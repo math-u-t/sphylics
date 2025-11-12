@@ -2,14 +2,18 @@
 
 このディレクトリには、bbauthのGoogle Apps Script実装が含まれています。
 
+>[!IMPORTANT]
+>
+>このディレクトリのコードはすべて`.gs`ファイルです。
+
 ## ファイル構成
 
 ```
 appsscript/
 ├── src/
-│   ├── Main.gs          # メインエントリポイント
-│   ├── Auth.gs          # 認証ユーティリティ
-│   └── Scopes.gs        # スコープ実行
+│   ├── Main.js          # メインエントリポイント
+│   ├── Auth.js          # 認証ユーティリティ
+│   └── Scopes.js        # スコープ実行
 ├── appsscript.json      # Apps Script設定
 └── README.md            # このファイル
 ```
@@ -57,7 +61,7 @@ clasp deployments
 デプロイ後、スクリプトエディタで `setup()` 関数を実行して、コールバックURLを設定します：
 
 ```javascript
-// Main.gs の setup() 関数を編集
+// Main.js の setup() 関数を編集
 function setup() {
   const callbackUrl = 'https://your-bbauth-domain.com/oauth/callback';
   const props = PropertiesService.getScriptProperties();
@@ -67,7 +71,7 @@ function setup() {
 ```
 
 実行方法：
-1. Apps Scriptエディタで `Main.gs` を開く
+1. Apps Scriptエディタで `Main.js` を開く
 2. 関数選択ドロップダウンから `setup` を選択
 3. 「実行」をクリック
 
@@ -120,7 +124,7 @@ function setup() {
 
 ```bash
 # claspでログを確認
-clasp logs
+clasp lojs
 
 # または、Apps Scriptエディタの「実行ログ」タブで確認
 ```
