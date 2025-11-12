@@ -1,0 +1,35 @@
+{
+  "name": "bbauth-workers",
+  "version": "1.0.0",
+  "description": "bbauth - RFC 6749準拠 OAuth 2.0 Provider (Cloudflare Workers)",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production",
+    "deploy:dev": "wrangler deploy --env dev",
+    "tail": "wrangler tail",
+    "kv:create": "wrangler kv:namespace create KV",
+    "kv:create:preview": "wrangler kv:namespace create KV --preview",
+    "kv:list": "wrangler kv:key list --binding KV",
+    "secret:put": "wrangler secret put",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "oauth2",
+    "openid-connect",
+    "cloudflare-workers",
+    "authentication",
+    "authorization"
+  ],
+  "author": "math-u-t",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "wrangler": "^3.22.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

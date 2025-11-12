@@ -1,0 +1,42 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cloudflare Workers
+workers/.wrangler/
+workers/.mf/
+workers/wrangler.toml.backup
+
+# Secrets (never commit!)
+*.pem
+*.key
+*.secret
+
+# Temporary files
+*.tmp
+.cache/
