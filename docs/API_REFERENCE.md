@@ -90,7 +90,7 @@ Authorization CodeをAccess Tokenに交換、またはRefresh Tokenで更新し�
 
 #### 2.1 Authorization Code Grant
 
-**Parameters:**
+**パラメータ:**
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
@@ -229,7 +229,7 @@ Content-Type: application/json
 
 ### 4. OpenID Connect Discovery
 
-OpenID Connect Discovery Document
+OpenID Connect ディスカバリードキュメント
 
 **Endpoint:** `GET /.well-known/openid-configuration`
 
