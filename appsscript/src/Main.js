@@ -5,12 +5,14 @@
 
 /**
  * Main entry point for HTTP GET requests
+ * Enhanced with authuser support for multi-account switching
  * @param {Object} e - Event parameter containing request details
  * @return {HtmlOutput} Redirect response
  */
 function doGet(e) {
   try {
     const sessionId = e.parameter.session_id;
+    const authuser = e.parameter.authuser;
 
     if (!sessionId) {
       return createErrorResponse('invalid_request', 'Missing session_id parameter');
@@ -20,6 +22,10 @@ function doGet(e) {
     const email = Session.getActiveUser().getEmail();
 
     if (!email) {
+      // If authuser is provided, construct Google account chooser URL
+      if (authuser !== undefined) {
+        return createAccountChooserPage(sessionId);
+      }
       return createErrorResponse('access_denied', 'Unable to retrieve user email. Please ensure you are logged in.');
     }
 
@@ -89,6 +95,74 @@ function getCallbackUrl() {
   }
 
   return callbackUrl;
+}
+
+/**
+ * Create Google account chooser page
+ * @param {string} sessionId - Session ID
+ * @return {HtmlOutput} Account chooser page
+ */
+function createAccountChooserPage(sessionId) {
+  const scriptUrl = ScriptApp.getService().getUrl();
+  const redirectUrl = scriptUrl + '?session_id=' + encodeURIComponent(sessionId);
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>bbauth - Sign In</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+          .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+          }
+          h1 {
+            color: #333;
+            margin-bottom: 10px;
+          }
+          p {
+            color: #666;
+            margin-bottom: 30px;
+          }
+          .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background 0.3s;
+          }
+          .btn:hover {
+            background: #357ae8;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🔐 bbauth</h1>
+          <p>Sign in with your Google Account</p>
+          <a href="${redirectUrl}" class="btn">Sign In with Google</a>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return HtmlService.createHtmlOutput(html);
 }
 
 /**

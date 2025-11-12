@@ -9,6 +9,18 @@ kv_namespaces = [
   { binding = "KV", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID" }
 ]
 
+# ============================================================
+# Environment Variables Configuration
+# ============================================================
+# IMPORTANT: Copy workers/.env.example to workers/.env and update with your values
+# Then update the [vars] section below with your actual configuration
+#
+# For sensitive values (JWT keys, admin tokens), use Wrangler secrets:
+#   wrangler secret put JWT_PRIVATE_KEY
+#   wrangler secret put JWT_PUBLIC_KEY
+#   wrangler secret put ADMIN_TOKEN
+# ============================================================
+
 # Environment variables (non-secret)
 [vars]
 ISSUER_URL = "https://bbauth.example.com"

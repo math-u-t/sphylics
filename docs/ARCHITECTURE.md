@@ -2,7 +2,7 @@
 
 ## システムアーキテクチャ図
 
-```marmaid
+```mermaid
 sequenceDiagram
     participant Client as Client Application<br/>(Web / Mobile / Desktop)
     participant WorkerAuth as Cloudflare Workers<br/>(Authorization Endpoint)
@@ -105,7 +105,7 @@ sequenceDiagram
 
 ### Authorization Code Flow
 
-```marmaid
+```mermaid
 sequenceDiagram
     participant Client as Client
     participant Workers as Cloudflare Workers

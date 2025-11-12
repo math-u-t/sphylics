@@ -104,19 +104,24 @@ async function handleAuthorizationCodeGrant(
 
   const accessToken = await signJWT(accessTokenPayload, env.JWT_PRIVATE_KEY);
 
-  // Generate ID Token (if openid scope)
+  // Generate ID Token (if openid scope requested)
   let idToken: string | undefined;
-  if (authCode.scope.includes('email')) {
+  if (authCode.scope.includes('openid')) {
     const idTokenPayload: JWTPayload = {
       iss: env.ISSUER_URL,
       sub: authCode.email,
       aud: clientId,
       iat: now,
       exp: accessTokenExpiry,
-      email: authCode.email,
-      email_verified: true,
       nonce: authCode.nonce,
     };
+
+    // Add email claims if email scope is requested
+    if (authCode.scope.includes('email')) {
+      idTokenPayload.email = authCode.email;
+      idTokenPayload.email_verified = true;
+    }
+
     idToken = await signJWT(idTokenPayload, env.JWT_PRIVATE_KEY);
   }
 

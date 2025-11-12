@@ -186,18 +186,69 @@ wrangler secret put JWT_PUBLIC_KEY
 
 ## Step 4: 環境変数設定
 
-### 4.1 wrangler.toml更新
+### 4.1 .envファイルの作成
+
+```bash
+cd workers
+cp .env.example .env
+```
+
+`.env`ファイルを編集し、実際の値に更新:
+
+```bash
+# Base URLs
+ISSUER_URL=https://bbauth.example.com
+APPS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+
+# CORS Configuration
+ALLOWED_ORIGINS=https://example.com,https://app.example.com
+
+# KV Namespace ID (Step 1で取得した値)
+KV_NAMESPACE_ID=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+KV_PREVIEW_ID=p1q2r3s4t5u6v7w8x9y0z1a2b3c4d5e6
+```
+
+### 4.2 wrangler.toml更新
+
+`.env`ファイルの値を使って`wrangler.toml`を更新:
 
 ```toml
+kv_namespaces = [
+  { binding = "KV", id = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6", preview_id = "p1q2r3s4t5u6v7w8x9y0z1a2b3c4d5e6" }
+]
+
+[vars]
+ISSUER_URL = "https://bbauth.example.com"
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+ALLOWED_ORIGINS = "https://example.com,https://app.example.com"
+
 [env.production]
 vars = {
   ISSUER_URL = "https://bbauth.example.com",
-  APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
+  APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_PRODUCTION_SCRIPT_ID/exec",
   ALLOWED_ORIGINS = "https://example.com"
+}
+
+[env.dev]
+vars = {
+  ISSUER_URL = "https://bbauth-dev.example.workers.dev",
+  APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEV_SCRIPT_ID/exec",
+  ALLOWED_ORIGINS = "http://localhost:3000,https://localhost:3000"
 }
 ```
 
-### 4.2 カスタムドメイン設定（オプション）
+### 4.3 Apps ScriptのCallback URL設定
+
+Apps Scriptエディタで`setup()`関数を実行:
+
+1. エディタで`Main.js`を開く
+2. `setup`関数を選択
+3. 実行ボタンをクリック（初回は権限確認が表示される）
+4. または、手動でScript Propertiesを設定:
+   - プロジェクト設定 → Script Properties
+   - 追加: `CALLBACK_URL` = `https://bbauth.example.com/oauth/callback`
+
+### 4.4 カスタムドメイン設定（オプション）
 
 Cloudflare Dashboard → Workers → bbauth → Triggers → Custom Domains:
 

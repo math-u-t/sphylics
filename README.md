@@ -49,9 +49,9 @@ RFC 6749準拠のOAuth 2.0プロバイダー。Cloudflare WorkersとGoogle Apps 
 
 ### アーキテクチャ
 
-```marmaid
+```mermaid
 flowchart LR
-    A[Client Application] 
+    A[Client Application]
         --> B[Cloudflare Workers<br/>(OAuth Logic)]
     B --> C[Google Apps Script<br/>(Identity Verification)]
     C --> D[Cloudflare Workers<br/>(Token Issue)]
