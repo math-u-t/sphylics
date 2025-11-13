@@ -1,0 +1,54 @@
+name = "bbauth"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV Namespace bindings
+# Run: wrangler kv:namespace create "KV" to get the ID
+# Run: wrangler kv:namespace create "KV" --preview to get the preview_id
+kv_namespaces = [
+  { binding = "KV", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID" }
+]
+
+# ============================================================
+# Environment Variables Configuration
+# ============================================================
+# IMPORTANT: Copy workers/.env.example to workers/.env and update with your values
+# Then update the [vars] section below with your actual configuration
+#
+# For sensitive values (JWT keys, admin tokens), use Wrangler secrets:
+#   wrangler secret put JWT_PRIVATE_KEY
+#   wrangler secret put JWT_PUBLIC_KEY
+#   wrangler secret put ADMIN_TOKEN
+# ============================================================
+
+# Environment variables (non-secret)
+[vars]
+ISSUER_URL = "https://bbauth.example.com"
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+ALLOWED_ORIGINS = "https://example.com,https://app.example.com"
+
+# Production environment
+[env.production]
+vars = {
+  ISSUER_URL = "https://bbauth.example.com",
+  APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_PRODUCTION_SCRIPT_ID/exec",
+  ALLOWED_ORIGINS = "https://example.com"
+}
+
+# Development environment
+[env.dev]
+vars = {
+  ISSUER_URL = "https://bbauth-dev.example.workers.dev",
+  APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEV_SCRIPT_ID/exec",
+  ALLOWED_ORIGINS = "http://localhost:3000,https://localhost:3000"
+}
+
+# Secrets (set with wrangler secret put)
+# - JWT_PRIVATE_KEY
+# - JWT_PUBLIC_KEY
+# - ADMIN_TOKEN
+
+# Usage:
+# wrangler secret put JWT_PRIVATE_KEY
+# wrangler secret put JWT_PUBLIC_KEY
+# wrangler secret put ADMIN_TOKEN
