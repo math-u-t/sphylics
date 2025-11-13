@@ -88,7 +88,7 @@ const joinChat = async () => {
   }
 
   // Save to local chats
-  const chats = JSON.parse(localStorage.getItem('sphylics_chats') || '[]')
+  const chats = JSON.parse(localStorage.getItem('flexio_chats') || '[]')
   if (!chats.find(c => c.id === chatId)) {
     chats.push({
       id: chatId,
@@ -98,7 +98,7 @@ const joinChat = async () => {
       isPrivate: true,
       createdAt: new Date().toISOString()
     })
-    localStorage.setItem('sphylics_chats', JSON.stringify(chats))
+    localStorage.setItem('flexio_chats', JSON.stringify(chats))
   }
 
   loading.value = false

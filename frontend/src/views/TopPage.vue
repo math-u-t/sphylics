@@ -7,7 +7,7 @@
           <span class="material-icons text-8xl md:text-9xl text-primary">chat_bubble</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
-          sphylics
+          flexio
         </h1>
         <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
           完全匿名のチャットプラットフォーム。<br />

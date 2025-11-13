@@ -1,7 +1,7 @@
 <template>
   <div class="about-page py-12 md:py-20">
     <div class="container mx-auto px-4 max-w-4xl">
-      <h1 class="text-4xl md:text-5xl font-bold mb-8 text-center">About sphylics</h1>
+      <h1 class="text-4xl md:text-5xl font-bold mb-8 text-center">About flexio</h1>
 
       <div class="space-y-12">
         <!-- Mission Section -->
@@ -11,7 +11,7 @@
             <h2 class="text-2xl font-bold">ミッション</h2>
           </div>
           <p class="text-lg leading-relaxed opacity-90">
-            sphylicsは、完全な匿名性とプライバシーを保ちながら、自由で安全なコミュニケーションを可能にすることを目指しています。
+            flexioは、完全な匿名性とプライバシーを保ちながら、自由で安全なコミュニケーションを可能にすることを目指しています。
             個人情報の収集を最小限に抑え、ユーザーの権利とプライバシーを最優先に考えたプラットフォームです。
           </p>
         </section>
@@ -61,7 +61,7 @@
             <h2 class="text-2xl font-bold">テクノロジー</h2>
           </div>
           <p class="mb-4 opacity-90">
-            sphylicsは最新の技術を使用して構築されています：
+            flexioは最新の技術を使用して構築されています：
           </p>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div class="p-4 rounded bg-gray-100 dark:bg-gray-800 text-center">
@@ -92,7 +92,7 @@
             <h2 class="text-2xl font-bold">チーム</h2>
           </div>
           <p class="opacity-90 mb-4">
-            sphylicsは、プライバシーとセキュリティに情熱を持つ開発者チームによって作られています。
+            flexioは、プライバシーとセキュリティに情熱を持つ開発者チームによって作られています。
           </p>
           <router-link to="/jobs" class="inline-flex items-center text-primary hover:underline">
             <span>採用情報を見る</span>

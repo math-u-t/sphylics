@@ -177,7 +177,7 @@ const createChat = async () => {
   inviteLink.value = window.location.origin + '/joinchat?id=' + chatId.value
 
   // Save chat to localStorage (mock)
-  const chats = JSON.parse(localStorage.getItem('sphylics_chats') || '[]')
+  const chats = JSON.parse(localStorage.getItem('flexio_chats') || '[]')
   chats.push({
     id: chatId.value,
     name: chatName.value,
@@ -187,7 +187,7 @@ const createChat = async () => {
     createdAt: new Date().toISOString(),
     lastMessage: null
   })
-  localStorage.setItem('sphylics_chats', JSON.stringify(chats))
+  localStorage.setItem('flexio_chats', JSON.stringify(chats))
 
   loading.value = false
   showSuccess.value = true

@@ -5,7 +5,7 @@
         <!-- Logo and Title -->
         <router-link to="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
           <span class="material-icons text-3xl text-primary">chat_bubble</span>
-          <span class="text-xl font-bold">sphylics</span>
+          <span class="text-xl font-bold">flexio</span>
         </router-link>
 
         <!-- Desktop Navigation -->
@@ -74,7 +74,7 @@ const { isDark, toggle } = useDarkMode()
 const mobileMenuOpen = ref(false)
 
 const isAuthenticated = computed(() => {
-  return !!localStorage.getItem('sphylics_user_id')
+  return !!localStorage.getItem('flexio_user_id')
 })
 
 const headerClasses = computed(() => {
@@ -94,9 +94,9 @@ const toggleDarkMode = () => {
 }
 
 const logout = () => {
-  localStorage.removeItem('sphylics_user_id')
-  localStorage.removeItem('sphylics_username')
-  localStorage.removeItem('sphylics_is_admin')
+  localStorage.removeItem('flexio_user_id')
+  localStorage.removeItem('flexio_username')
+  localStorage.removeItem('flexio_is_admin')
   mobileMenuOpen.value = false
   router.push('/')
 }

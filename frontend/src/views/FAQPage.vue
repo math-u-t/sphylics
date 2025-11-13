@@ -37,8 +37,8 @@ const { isDark } = useDarkMode()
 
 const faqs = ref([
   {
-    question: 'sphylicsとは何ですか?',
-    answer: 'sphylicsは完全匿名のチャットアプリケーションです。個人情報を一切要求せず、安全でプライベートなコミュニケーションを提供します。',
+    question: 'flexioとは何ですか?',
+    answer: 'flexioは完全匿名のチャットアプリケーションです。個人情報を一切要求せず、安全でプライベートなコミュニケーションを提供します。',
     open: false
   },
   {
@@ -83,7 +83,7 @@ const faqs = ref([
   },
   {
     question: '無料で使えますか?',
-    answer: 'はい、sphylicsは完全無料でご利用いただけます。',
+    answer: 'はい、flexioは完全無料でご利用いただけます。',
     open: false
   }
 ])

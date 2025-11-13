@@ -8,7 +8,7 @@
         <section class="card elevation-1 p-6 rounded-lg" :class="cardClasses">
           <h2 class="text-2xl font-bold mb-4">1. 規約への同意</h2>
           <p class="opacity-90 leading-relaxed">
-            sphylics（以下「当サービス」）をご利用いただくことで、本利用規約に同意したものとみなされます。
+            flexio（以下「当サービス」）をご利用いただくことで、本利用規約に同意したものとみなされます。
             同意いただけない場合は、当サービスをご利用いただけません。
           </p>
         </section>

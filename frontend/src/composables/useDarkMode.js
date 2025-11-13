@@ -16,17 +16,17 @@ export function useDarkMode() {
     if (newValue) {
       document.documentElement.classList.add('dark')
       document.documentElement.classList.remove('light')
-      localStorage.setItem('sphylics_theme', 'dark')
+      localStorage.setItem('flexio_theme', 'dark')
     } else {
       document.documentElement.classList.add('light')
       document.documentElement.classList.remove('dark')
-      localStorage.setItem('sphylics_theme', 'light')
+      localStorage.setItem('flexio_theme', 'light')
     }
   })
 
   // Initialize theme on mount
   onMounted(() => {
-    const savedTheme = localStorage.getItem('sphylics_theme')
+    const savedTheme = localStorage.getItem('flexio_theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
     if (savedTheme) {

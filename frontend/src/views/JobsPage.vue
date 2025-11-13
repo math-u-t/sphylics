@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 max-w-6xl">
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold mb-4">採用情報</h1>
-        <p class="text-lg opacity-80">sphylicsで一緒に働きませんか?</p>
+        <p class="text-lg opacity-80">flexioで一緒に働きませんか?</p>
       </div>
 
       <!-- Company Values -->

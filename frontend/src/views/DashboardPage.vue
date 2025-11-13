@@ -168,17 +168,17 @@ const formatDate = (dateString) => {
 }
 
 const loadUserData = () => {
-  userId.value = localStorage.getItem('sphylics_user_id') || ''
-  username.value = localStorage.getItem('sphylics_username') || 'Anonymous'
+  userId.value = localStorage.getItem('flexio_user_id') || ''
+  username.value = localStorage.getItem('flexio_username') || 'Anonymous'
 
   // Load chats
-  const savedChats = JSON.parse(localStorage.getItem('sphylics_chats') || '[]')
+  const savedChats = JSON.parse(localStorage.getItem('flexio_chats') || '[]')
   chats.value = savedChats
 
   // Calculate total messages
   let messageCount = 0
   savedChats.forEach(chat => {
-    const messages = JSON.parse(localStorage.getItem(`sphylics_chat_${chat.id}`) || '[]')
+    const messages = JSON.parse(localStorage.getItem(`flexio_chat_${chat.id}`) || '[]')
     messageCount += messages.length
   })
   totalMessages.value = messageCount
@@ -200,7 +200,7 @@ const exportData = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `sphylics-data-${Date.now()}.json`
+  a.download = `flexio-data-${Date.now()}.json`
   a.click()
   URL.revokeObjectURL(url)
 
@@ -209,8 +209,8 @@ const exportData = () => {
 
 const confirmLogout = () => {
   if (confirm('ログアウトしてもよろしいですか?')) {
-    localStorage.removeItem('sphylics_user_id')
-    localStorage.removeItem('sphylics_username')
+    localStorage.removeItem('flexio_user_id')
+    localStorage.removeItem('flexio_username')
     router.push('/')
   }
 }

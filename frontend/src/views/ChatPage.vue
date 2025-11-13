@@ -249,9 +249,9 @@ const sendMessage = async () => {
   scrollToBottom()
 
   // Save to localStorage
-  const chatMessages = JSON.parse(localStorage.getItem(`sphylics_chat_${chatId.value}`) || '[]')
+  const chatMessages = JSON.parse(localStorage.getItem(`flexio_chat_${chatId.value}`) || '[]')
   chatMessages.push(message)
-  localStorage.setItem(`sphylics_chat_${chatId.value}`, JSON.stringify(chatMessages))
+  localStorage.setItem(`flexio_chat_${chatId.value}`, JSON.stringify(chatMessages))
 }
 
 const scrollToBottom = () => {
@@ -271,7 +271,7 @@ const copyInviteLink = async () => {
 
 const loadChat = () => {
   // Load chat info from localStorage
-  const chats = JSON.parse(localStorage.getItem('sphylics_chats') || '[]')
+  const chats = JSON.parse(localStorage.getItem('flexio_chats') || '[]')
   const chat = chats.find(c => c.id === chatId.value)
 
   if (chat) {
@@ -283,7 +283,7 @@ const loadChat = () => {
   }
 
   // Load messages
-  const savedMessages = JSON.parse(localStorage.getItem(`sphylics_chat_${chatId.value}`) || '[]')
+  const savedMessages = JSON.parse(localStorage.getItem(`flexio_chat_${chatId.value}`) || '[]')
   messages.value = savedMessages
 
   // Add some demo messages if empty

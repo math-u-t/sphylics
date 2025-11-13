@@ -4,7 +4,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- About Section -->
         <div>
-          <h3 class="font-bold text-lg mb-3">sphylics</h3>
+          <h3 class="font-bold text-lg mb-3">flexio</h3>
           <p class="text-sm opacity-80">
             完全匿名のチャットアプリケーション。安全でプライベートなコミュニケーションを提供します。
           </p>
@@ -43,7 +43,7 @@
       </div>
 
       <div class="mt-8 pt-6 border-t text-center text-sm opacity-70" :class="borderClasses">
-        <p>&copy; 2024 sphylics. All rights reserved.</p>
+        <p>&copy; 2024 flexio. All rights reserved.</p>
       </div>
     </div>
   </footer>

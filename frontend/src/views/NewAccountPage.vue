@@ -131,8 +131,8 @@ const createAccount = async () => {
   const displayName = username.value || 'Anonymous_' + Math.random().toString(36).substr(2, 6)
 
   // Save to localStorage
-  localStorage.setItem('sphylics_user_id', userId.value)
-  localStorage.setItem('sphylics_username', displayName)
+  localStorage.setItem('flexio_user_id', userId.value)
+  localStorage.setItem('flexio_username', displayName)
 
   loading.value = false
   showSuccess.value = true

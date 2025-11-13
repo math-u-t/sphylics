@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 max-w-6xl">
       <div class="mb-8">
         <h1 class="text-4xl font-bold mb-4">API Documentation</h1>
-        <p class="text-lg opacity-80">sphylics REST API リファレンス</p>
+        <p class="text-lg opacity-80">flexio REST API リファレンス</p>
       </div>
 
       <!-- Overview -->
@@ -13,11 +13,11 @@
           概要
         </h2>
         <p class="mb-4 opacity-90">
-          sphylics APIは、匿名チャットアプリケーションのバックエンド機能を提供するRESTful APIです。
+          flexio APIは、匿名チャットアプリケーションのバックエンド機能を提供するRESTful APIです。
           すべてのエンドポイントはJSON形式でデータを送受信します。
         </p>
         <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded">
-          <p class="font-mono text-sm"><strong>Base URL:</strong> https://api.sphylics.com/v1</p>
+          <p class="font-mono text-sm"><strong>Base URL:</strong> https://api.flexio.com/v1</p>
         </div>
       </section>
 
@@ -92,7 +92,7 @@
   chatId: "chat_xyz789",
   name: "Chat Room Name",
   description: "Optional description",
-  inviteLink: "https://sphylics.com/joinchat?id=chat_xyz789",
+  inviteLink: "https://flexio.com/joinchat?id=chat_xyz789",
   createdAt: "2024-01-01T00:00:00Z"
 }</pre>
             </div>
@@ -275,15 +275,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="p-4 border rounded" :class="borderClasses">
             <h3 class="font-bold mb-2">JavaScript/TypeScript</h3>
-            <code class="text-sm">npm install @sphylics/sdk</code>
+            <code class="text-sm">npm install @flexio/sdk</code>
           </div>
           <div class="p-4 border rounded" :class="borderClasses">
             <h3 class="font-bold mb-2">Python</h3>
-            <code class="text-sm">pip install sphylics</code>
+            <code class="text-sm">pip install flexio</code>
           </div>
           <div class="p-4 border rounded" :class="borderClasses">
             <h3 class="font-bold mb-2">Go</h3>
-            <code class="text-sm">go get github.com/sphylics/sdk-go</code>
+            <code class="text-sm">go get github.com/flexio/sdk-go</code>
           </div>
         </div>
       </section>
@@ -299,7 +299,7 @@
             <span class="material-icons mr-2">email</span>
             お問い合わせ
           </router-link>
-          <a href="https://github.com/sphylics" target="_blank" class="btn-secondary px-6 py-3 rounded-lg inline-flex items-center">
+          <a href="https://github.com/flexio" target="_blank" class="btn-secondary px-6 py-3 rounded-lg inline-flex items-center">
             <span class="material-icons mr-2">code</span>
             GitHub
           </a>
