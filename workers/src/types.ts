@@ -142,3 +142,67 @@ export interface JWK {
   n?: string;
   e?: string;
 }
+
+// ============================================================
+// Chat API Types
+// ============================================================
+
+// Chat Data stored in KV
+export interface ChatData {
+  link: string;
+  title: string;
+  about: string;
+  tags: string[];
+  adminToken: string;  // tokenで管理者を特定
+  createdAt: number;
+  updatedAt: number;
+  participantCount: number;
+}
+
+// Chat creation request
+export interface ChatCreateRequest {
+  token: string;
+  future?: any;  // 将来の拡張用
+  content: {
+    title: string;
+    about: string;
+    tag: string[];
+    link: string;
+  };
+}
+
+// Chat update request
+export interface ChatUpdateRequest {
+  token: string;
+  link: string;
+  content: {
+    title?: string;
+    about?: string;
+    tag?: string[];
+  };
+}
+
+// Chat delete request
+export interface ChatDeleteRequest {
+  token: string;
+  link: string;
+}
+
+// Chat response
+export interface ChatResponse {
+  link: string;
+  title: string;
+  about: string;
+  tags: string[];
+  createdAt: number;
+  updatedAt: number;
+  participantCount: number;
+  isAdmin?: boolean;  // リクエストユーザーが管理者かどうか
+}
+
+// API Standard Response
+export interface APIResponse<T = any> {
+  statusCode: number;
+  content: T | string;
+  error?: string;
+}

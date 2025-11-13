@@ -16,6 +16,14 @@ import {
   handleClientDelete,
   handleProviderRegister,
 } from './handlers/admin';
+import {
+  handleChatCreate,
+  handleChatGet,
+  handleChatList,
+  handleChatUpdate,
+  handleChatDelete,
+  handleParticipantUpdate,
+} from './handlers/chat';
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -66,19 +74,48 @@ export default {
         response = await handleClientDelete(request, env, clientId);
       } else if (path === '/admin/provider/register' && method === 'POST') {
         response = await handleProviderRegister(request, env);
+
+      // ============================================================
+      // Chat API Routes
+      // ============================================================
+      } else if (path === '/chat/new' && method === 'POST') {
+        response = await handleChatCreate(request, env);
+      } else if (path === '/chat/list' && method === 'GET') {
+        response = await handleChatList(request, env);
+      } else if (path === '/chat/update' && method === 'PUT') {
+        response = await handleChatUpdate(request, env);
+      } else if (path === '/chat/delete' && method === 'DELETE') {
+        response = await handleChatDelete(request, env);
+      } else if (path.startsWith('/chat/') && path.endsWith('/participants') && method === 'POST') {
+        const link = path.split('/')[2];
+        response = await handleParticipantUpdate(request, env, link);
+      } else if (path.startsWith('/chat/') && method === 'GET' && !path.includes('/participants')) {
+        const link = path.split('/').pop()!;
+        response = await handleChatGet(request, env, link);
+
       } else if (path === '/' && method === 'GET') {
         // Root endpoint - API info
         response = new Response(
           JSON.stringify({
-            name: 'bbauth',
+            name: 'flexio-api',
             version: '1.0.0',
-            description: 'RFC 6749準拠 OAuth 2.0 Provider',
+            description: 'Flexio API - OAuth 2.0 Provider & Chat API',
             endpoints: {
-              authorization: '/oauth/authorize',
-              token: '/oauth/token',
-              userinfo: '/oauth/userinfo',
-              discovery: '/.well-known/openid-configuration',
-              jwks: '/.well-known/jwks.json',
+              oauth: {
+                authorization: '/oauth/authorize',
+                token: '/oauth/token',
+                userinfo: '/oauth/userinfo',
+                discovery: '/.well-known/openid-configuration',
+                jwks: '/.well-known/jwks.json',
+              },
+              chat: {
+                create: 'POST /chat/new',
+                get: 'GET /chat/:link',
+                list: 'GET /chat/list',
+                update: 'PUT /chat/update',
+                delete: 'DELETE /chat/delete',
+                participants: 'POST /chat/:link/participants',
+              },
             },
           }, null, 2),
           {
