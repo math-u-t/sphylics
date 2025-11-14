@@ -24,6 +24,31 @@ import {
   handleChatDelete,
   handleParticipantUpdate,
 } from './handlers/chat';
+import {
+  handleCommentPost,
+  handleCommentEdit,
+  handleCommentDelete,
+  handleCommentsGet,
+} from './handlers/comment';
+import {
+  handleReactionAdd,
+  handleReactionRemove,
+  handleReactionList,
+} from './handlers/reaction';
+import {
+  handleCommentReport,
+  handleChatReport,
+  handleReportsList,
+  handleReportReview,
+} from './handlers/report';
+import {
+  handleServiceStats,
+  handleServiceDetail,
+  handleNotificationList,
+  handleAdminLogs,
+} from './handlers/service';
+import { rateLimitMiddleware } from './middleware/rateLimit';
+import { requireAdminToken } from './middleware/auth';
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -45,6 +70,12 @@ export default {
         status: 204,
         headers: corsHeaders,
       });
+    }
+
+    // Rate limiting
+    const rateLimitResponse = await rateLimitMiddleware(request, env);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     let response: Response;
@@ -76,12 +107,88 @@ export default {
         response = await handleProviderRegister(request, env);
 
       // ============================================================
-      // Chat API Routes
+      // Flexio API Routes
       // ============================================================
+
+      // Chat Routes
       } else if (path === '/chat/new' && method === 'POST') {
         response = await handleChatCreate(request, env);
       } else if (path === '/chat/list' && method === 'GET') {
         response = await handleChatList(request, env);
+      } else if (path === '/chat/reactions' && method === 'GET') {
+        response = await handleReactionList(request, env);
+
+      // Chat-specific routes (with :chatLink parameter)
+      } else if (path.match(/^\/chat\/[^\/]+\/post$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleCommentPost(request, env, chatLink);
+      } else if (path.match(/^\/chat\/[^\/]+\/comment\/edit$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleCommentEdit(request, env, chatLink);
+      } else if (path.match(/^\/chat\/[^\/]+\/comment\/reaction$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleReactionAdd(request, env, chatLink);
+      } else if (path.match(/^\/chat\/[^\/]+\/join$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleParticipantUpdate(request, env, chatLink);
+      } else if (path.match(/^\/chat\/[^\/]+\/edit$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleChatUpdate(request, env);
+      } else if (path.match(/^\/chat\/[^\/]+\/del$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleChatDelete(request, env);
+      } else if (path.match(/^\/chat\/[^\/]+\/report$/) && method === 'POST') {
+        const chatLink = path.split('/')[2];
+        response = await handleChatReport(request, env, chatLink);
+      } else if (path.match(/^\/chat\/[^\/]+\/comments$/) && method === 'GET') {
+        const chatLink = path.split('/')[2];
+        response = await handleCommentsGet(request, env, chatLink);
+
+      // Comment-specific routes (with :chatLink and :commentId)
+      } else if (path.match(/^\/chat\/[^\/]+\/del\/[^\/]+$/) && method === 'POST') {
+        const parts = path.split('/');
+        const chatLink = parts[2];
+        const commentId = parts[4];
+        response = await handleCommentDelete(request, env, chatLink, commentId);
+      } else if (path.match(/^\/chat\/[^\/]+\/comment\/[^\/]+\/report$/) && method === 'POST') {
+        const parts = path.split('/');
+        const chatLink = parts[2];
+        const commentId = parts[4];
+        response = await handleCommentReport(request, env, chatLink, commentId);
+      } else if (path.match(/^\/chat\/[^\/]+\/comment\/[^\/]+\/reaction$/) && method === 'DELETE') {
+        const parts = path.split('/');
+        const chatLink = parts[2];
+        const commentId = parts[4];
+        response = await handleReactionRemove(request, env, chatLink, commentId);
+
+      // Admin Routes
+      } else if (path === '/admin/reports' && method === 'GET') {
+        const authResult = await requireAdminToken(request, env);
+        if (authResult instanceof Response) {
+          response = authResult;
+        } else {
+          response = await handleReportsList(request, env);
+        }
+      } else if (path.match(/^\/admin\/report\/[^\/]+\/review$/) && method === 'POST') {
+        const authResult = await requireAdminToken(request, env);
+        if (authResult instanceof Response) {
+          response = authResult;
+        } else {
+          const reportId = path.split('/')[3];
+          response = await handleReportReview(request, env, reportId, authResult.userName);
+        }
+
+      // Service Routes
+      } else if (path === '/service/stats' && method === 'POST') {
+        response = await handleServiceStats(request, env);
+      } else if (path === '/service/detail' && method === 'POST') {
+        response = await handleServiceDetail(request, env);
+      } else if (path === '/service/admin' && method === 'POST') {
+        response = await handleAdminLogs(request, env);
+      } else if (path === '/notification/bbauth' && method === 'POST') {
+        response = await handleNotificationList(request, env);
+
+      // Legacy routes (backward compatibility)
       } else if (path === '/chat/update' && method === 'PUT') {
         response = await handleChatUpdate(request, env);
       } else if (path === '/chat/delete' && method === 'DELETE') {
@@ -89,7 +196,7 @@ export default {
       } else if (path.startsWith('/chat/') && path.endsWith('/participants') && method === 'POST') {
         const link = path.split('/')[2];
         response = await handleParticipantUpdate(request, env, link);
-      } else if (path.startsWith('/chat/') && method === 'GET' && !path.includes('/participants')) {
+      } else if (path.startsWith('/chat/') && method === 'GET' && !path.includes('/')) {
         const link = path.split('/').pop()!;
         response = await handleChatGet(request, env, link);
 
@@ -99,7 +206,7 @@ export default {
           JSON.stringify({
             name: 'flexio-api',
             version: '1.0.0',
-            description: 'Flexio API - OAuth 2.0 Provider & Chat API',
+            description: 'Flexio API - Complete Anonymous Chat System with OAuth 2.0',
             endpoints: {
               oauth: {
                 authorization: '/oauth/authorize',
@@ -109,14 +216,47 @@ export default {
                 jwks: '/.well-known/jwks.json',
               },
               chat: {
-                create: 'POST /chat/new',
-                get: 'GET /chat/:link',
                 list: 'GET /chat/list',
-                update: 'PUT /chat/update',
-                delete: 'DELETE /chat/delete',
-                participants: 'POST /chat/:link/participants',
+                create: 'POST /chat/new',
+                get: 'GET /chat/:chatLink',
+                join: 'POST /chat/:chatLink/join',
+                edit: 'POST /chat/:chatLink/edit',
+                delete: 'POST /chat/:chatLink/del',
+                report: 'POST /chat/:chatLink/report',
+                authory: 'GET /chat/:chatLink/authory',
+                comments: 'GET /chat/:chatLink/comments',
+              },
+              comment: {
+                post: 'POST /chat/:chatLink/post',
+                edit: 'POST /chat/:chatLink/comment/edit',
+                delete: 'POST /chat/:chatLink/del/:commentId',
+                report: 'POST /chat/:chatLink/comment/:commentId/report',
+              },
+              reaction: {
+                add: 'POST /chat/:chatLink/comment/reaction',
+                remove: 'DELETE /chat/:chatLink/comment/:commentId/reaction',
+                list: 'GET /chat/reactions',
+              },
+              admin: {
+                reports: 'GET /admin/reports',
+                review: 'POST /admin/report/:reportId/review',
+                logs: 'POST /service/admin',
+              },
+              service: {
+                stats: 'POST /service/stats',
+                detail: 'POST /service/detail',
+                notifications: 'POST /notification/bbauth',
               },
             },
+            features: [
+              'Anonymous chat rooms with role-based permissions',
+              'Comment system with reactions (21 permanent + 10 seasonal)',
+              'Trust score calculation',
+              'Report system for moderation',
+              'Admin logging for transparency',
+              'Rate limiting (60 req/min)',
+              'JWT-based authentication (5 token types)',
+            ],
           }, null, 2),
           {
             status: 200,

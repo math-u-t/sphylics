@@ -144,25 +144,366 @@ export interface JWK {
 }
 
 // ============================================================
-// Chat API Types
+// Flexio API Types - Complete Implementation
 // ============================================================
 
-// Chat Data stored in KV
+// ============================================================
+// Token System - 5 Types of Tokens
+// ============================================================
+
+// Chat Role Types
+export type ChatRole = 'blocked' | 'notParticipating' | 'audience' | 'entrant' | 'manager' | 'owner';
+
+// Admin Role Types
+export type AdminRole = 'audit' | 'dev' | 'council';
+
+// 1. USER_TOKEN - Chat内ユーザー識別トークン
+export interface UserTokenPayload {
+  userName: string;
+  link: string;  // チャットUUID
+  savedTime: string;  // ISO 8601形式
+  authory: ChatRole;
+}
+
+// 2. COMMENT_TOKEN - コメント識別トークン
+export interface CommentTokenPayload {
+  userToken: string;
+  link: string;
+  text: string;
+  commentID: string;  // UUID
+  commentedTime: string;  // ISO 8601形式
+}
+
+// 3. INSIDE_ACCOUNT_TOKEN - 機密情報（公開禁止）
+export interface InsideAccountTokenPayload {
+  bbauthAccountID: string;
+  belonging: {
+    [chatLink: string]: {
+      authory: ChatRole;
+    };
+  };
+  serviceJoined: string;  // ISO 8601形式
+  flexioCoin: number;
+}
+
+// 4. SERVICE_TOKEN - サービス全体認証トークン
+export interface ServiceTokenPayload {
+  serviceID: string;
+  accountID: string;
+  issuedAt: string;  // ISO 8601形式
+  expiresAt: string;  // ISO 8601形式
+}
+
+// 5. ADMIN_TOKEN - 管理者認証トークン
+export interface AdminTokenPayload {
+  userName: string;
+  passwordHash: string;  // ハッシュ化済み
+  authory: AdminRole;
+  period: string;  // 有効期限 ISO 8601形式
+}
+
+// ============================================================
+// Reaction System
+// ============================================================
+
+// 常設リアクション
+export const PERMANENT_REACTIONS = {
+  good: '👍',
+  love: '❤️',
+  laugh: '😂',
+  wow: '😮',
+  sad: '😢',
+  angry: '😠',
+  thanks: '🙏',
+  later: '⏳',
+  checked: '✔️',
+  typing: '✍️',
+  important: '📌',
+  agree: '🔁',
+  ok: '🆗',
+  joke: '🤡',
+  hurry: '🐸',
+  awesome: '🔥',
+  king: '👑',
+  'dead-funny': '💀',
+  vote: '📊',
+  'take-role': '🏷️',
+  nostop: '⛔',
+} as const;
+
+// 季節限定リアクション
+export interface SeasonalReaction {
+  name: string;
+  emoji: string;
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+}
+
+export const SEASONAL_REACTIONS: SeasonalReaction[] = [
+  { name: 'new-year', emoji: '🎍', startMonth: 1, startDay: 1, endMonth: 1, endDay: 1 },
+  { name: 'girls-day', emoji: '🎎', startMonth: 3, startDay: 1, endMonth: 3, endDay: 1 },
+  { name: 'spring', emoji: '🌸', startMonth: 3, startDay: 20, endMonth: 4, endDay: 10 },
+  { name: 'childrens-day', emoji: '🎏', startMonth: 5, startDay: 5, endMonth: 5, endDay: 5 },
+  { name: 'summer', emoji: '🌻', startMonth: 6, startDay: 30, endMonth: 8, endDay: 20 },
+  { name: 'fireworks', emoji: '🎆', startMonth: 8, startDay: 10, endMonth: 8, endDay: 20 },
+  { name: 'autumn', emoji: '🍁', startMonth: 9, startDay: 10, endMonth: 11, endDay: 20 },
+  { name: 'halloween', emoji: '🎃', startMonth: 10, startDay: 31, endMonth: 10, endDay: 31 },
+  { name: 'winter', emoji: '⛄', startMonth: 12, startDay: 1, endMonth: 2, endDay: 20 },
+  { name: 'christmas', emoji: '🎄', startMonth: 12, startDay: 24, endMonth: 12, endDay: 25 },
+];
+
+export type ReactionName = keyof typeof PERMANENT_REACTIONS | string;
+
+// ============================================================
+// Data Models
+// ============================================================
+
+// Account (グローバル・永続的)
+export interface AccountData {
+  accountID: string;
+  bbauthAccountID: string;
+  belonging: {
+    [chatLink: string]: {
+      authory: ChatRole;
+      userName: string;
+      joinedAt: string;  // ISO 8601
+    };
+  };
+  serviceJoined: string;  // ISO 8601
+  flexioCoin: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// User (チャット内・一時的)
+export interface UserData {
+  userName: string;
+  link: string;
+  authory: ChatRole;
+  accountID?: string;  // 紐付けられたアカウント（オプション）
+  joinedAt: string;  // ISO 8601
+}
+
+// Chat Data
 export interface ChatData {
   link: string;
   title: string;
   about: string;
   tags: string[];
-  adminToken: string;  // tokenで管理者を特定
+  recent: string;  // ISO 8601 - 最終活動時刻
+  authory: {
+    blocked: string[];  // userNames
+    notParticipating: string[];
+    audience: string[];
+    entrant: string[];
+    manager: string[];
+    owner: string[];
+  };
   createdAt: number;
   updatedAt: number;
-  participantCount: number;
+  commentCount: number;
+}
+
+// Comment Data
+export interface CommentData {
+  commentID: string;
+  chatLink: string;
+  userName: string;
+  text: string;
+  commentedTime: string;  // ISO 8601
+  editedTime?: string;  // ISO 8601
+  reaction: {
+    [userName: string]: ReactionName;
+  };
+  deleted: boolean;
+}
+
+// Report Data
+export interface ReportData {
+  reportID: string;
+  type: 'comment' | 'chat';
+  targetID: string;  // commentID or chatLink
+  reporterName: string;
+  reason: string;
+  createdAt: string;  // ISO 8601
+  status: 'pending' | 'reviewing' | 'resolved' | 'rejected';
+  reviewedBy?: string;  // admin userName
+  reviewedAt?: string;  // ISO 8601
+}
+
+// Admin Log
+export interface AdminLogData {
+  logID: string;
+  adminUserName: string;
+  action: string;
+  targetType: 'chat' | 'comment' | 'user' | 'report' | 'document' | 'faq';
+  targetID: string;
+  details: any;
+  timestamp: string;  // ISO 8601
+}
+
+// Notification Data
+export interface NotificationData {
+  notificationID: string;
+  accountID: string;
+  title: string;
+  message: string;
+  chatLink: string;
+  commentID: string | null;
+  createdTime: string;  // ISO 8601
+  read: boolean;
+}
+
+// Trust Score Components
+export interface TrustScoreData {
+  chatLink: string;
+  ageScore: number;  // 0-1
+  userScore: number;  // 0-1
+  commentScore: number;  // 0-1
+  trustScore: number;  // 0-1 (weighted average)
+  calculatedAt: string;  // ISO 8601
+}
+
+// ============================================================
+// API Request/Response Types
+// ============================================================
+
+// Standard API Response
+export interface APIResponse<T = any> {
+  statusCode: number;
+  content: T;
+}
+
+export interface APIErrorResponse {
+  statusCode: number;
+  error: string;
+  content: string;
+}
+
+// Chat List Request
+export interface ChatListRequest {
+  token: string;  // SERVICE_TOKEN
+  content: {
+    query: string;
+    type: 'belonging' | 'all' | 'tag' | 'time';
+  };
+}
+
+// Chat List Response
+export interface ChatListResponse {
+  chat: {
+    [chatLink: string]: {
+      title: string;
+      about: string;
+      tag: string[];
+      recent: string;  // ISO 8601
+      authory: {
+        blocked: string[];
+        audience: string[];
+        entrant: string[];
+        manager: string[];
+        owner: string[];
+      };
+    };
+  };
+}
+
+// Comment Post Request
+export interface CommentPostRequest {
+  token: string;  // SERVICE_TOKEN
+  content: {
+    joinUserToken: string;  // USER_TOKEN
+    comment: {
+      text: string;
+    };
+  };
+}
+
+// Comment Edit Request
+export interface CommentEditRequest {
+  token: string;
+  content: {
+    sendUserToken: string;
+    commentID: string;
+    edited: string;
+  };
+}
+
+// Chat Get Response
+export interface ChatGetResponse {
+  chat: {
+    comment: {
+      [commentId: string]: {
+        text: string;
+        commentedTime: string;
+        userName: string;
+        reaction: {
+          [userName: string]: string;  // reaction name
+        };
+      };
+    };
+    information: {
+      title: string;
+      about: string;
+      tag: string[];
+      recent: string;
+      authory: {
+        blocked: string[];
+        audience: string[];
+        entrant: string[];
+        manager: string[];
+        owner: string[];
+      };
+    };
+  };
+}
+
+// Reaction Add Request
+export interface ReactionAddRequest {
+  token: string;
+  content: {
+    userToken: string;
+    commentID: string;
+    reactionName: string;
+  };
+}
+
+// Admin Login Request
+export interface AdminLoginRequest {
+  userName: string;
+  password: string;
+}
+
+// Notification Response
+export interface NotificationResponse {
+  notifications: Array<{
+    notificationID: string;
+    title: string;
+    message: string;
+    chatLink: string;
+    commentID: string | null;
+    createdTime: string;
+    read: boolean;
+  }>;
+  total: number;
+}
+
+// Service Stats Response
+export interface ServiceStatsResponse {
+  totalChats: number;
+  totalComments: number;
+  totalUsers: number;
+  activeChatsLast24h: number;
+  activeUsersLast24h: number;
+  averageTrustScore: number;
 }
 
 // Chat creation request
 export interface ChatCreateRequest {
   token: string;
-  future?: any;  // 将来の拡張用
+  future?: any;
   content: {
     title: string;
     about: string;
@@ -197,12 +538,5 @@ export interface ChatResponse {
   createdAt: number;
   updatedAt: number;
   participantCount: number;
-  isAdmin?: boolean;  // リクエストユーザーが管理者かどうか
-}
-
-// API Standard Response
-export interface APIResponse<T = any> {
-  statusCode: number;
-  content: T | string;
-  error?: string;
+  isAdmin?: boolean;
 }

@@ -1,6 +1,11 @@
-name = "bbauth"
+name = "flexio-api"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
+
+# Worker configuration
+workers_dev = true
+account_id = ""
+route = ""
 
 # KV Namespace bindings
 # Run: wrangler kv:namespace create "KV" to get the ID
@@ -8,6 +13,11 @@ compatibility_date = "2024-01-01"
 kv_namespaces = [
   { binding = "KV", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID" }
 ]
+
+# Limits
+[limits]
+# CPU time limit per request (ms)
+cpu_ms = 50
 
 # ============================================================
 # Environment Variables Configuration

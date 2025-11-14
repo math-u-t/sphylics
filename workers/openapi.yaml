@@ -1,0 +1,1024 @@
+openapi: 3.0.3
+info:
+  title: Flexio API
+  description: |
+    **Flexio** - Complete anonymous chat and comment system with advanced moderation capabilities.
+
+    ## Features
+    - Anonymous chat rooms with role-based permissions
+    - Comment system with 31 types of reactions
+    - Trust score calculation
+    - Comprehensive report & moderation system
+    - Admin logging for transparency
+    - Rate limiting (60 requests/minute)
+
+    ## Authentication
+    Flexio uses JWT-based authentication with 5 token types:
+    - **SERVICE_TOKEN**: Required for most user operations
+    - **USER_TOKEN**: Chat-scoped user identity
+    - **ADMIN_TOKEN**: Administrative operations
+    - **COMMENT_TOKEN**: Comment identification
+    - **INSIDE_ACCOUNT_TOKEN**: Internal only (never exposed)
+
+  version: 1.0.0
+  contact:
+    name: Flexio Support
+    email: support@flexio.example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.flexio.example.com
+    description: Production server
+  - url: https://api-staging.flexio.example.com
+    description: Staging server
+  - url: http://localhost:8787
+    description: Local development
+
+tags:
+  - name: Chat
+    description: Chat room management
+  - name: Comment
+    description: Comment operations
+  - name: Reaction
+    description: Reaction management
+  - name: Report
+    description: Reporting & moderation
+  - name: Admin
+    description: Administrative operations
+  - name: Service
+    description: Service information & statistics
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ==================== Chat Endpoints ====================
+
+  /chat/list:
+    get:
+      tags: [Chat]
+      summary: List all chats
+      description: Retrieve a list of chats with optional filtering
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: SERVICE_TOKEN
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [belonging, all, tag, time]
+          description: Filter type
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /chat/new:
+    post:
+      tags: [Chat]
+      summary: Create a new chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCreateRequest'
+      responses:
+        '201':
+          description: Chat created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Chat link already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/{chatLink}:
+    get:
+      tags: [Chat]
+      summary: Get chat details and comments
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+        - name: token
+          in: query
+          schema:
+            type: string
+          description: Optional SERVICE_TOKEN for permission check
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /chat/{chatLink}/join:
+    post:
+      tags: [Chat]
+      summary: Join a chat
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [join, leave]
+              required: [action]
+      responses:
+        '200':
+          description: Successfully joined/left chat
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /chat/{chatLink}/edit:
+    post:
+      tags: [Chat]
+      summary: Edit chat metadata (owner only)
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatUpdateRequest'
+      responses:
+        '200':
+          description: Chat updated successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /chat/{chatLink}/del:
+    post:
+      tags: [Chat]
+      summary: Delete a chat (owner only)
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                link:
+                  type: string
+              required: [token, link]
+      responses:
+        '200':
+          description: Chat deleted successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==================== Comment Endpoints ====================
+
+  /chat/{chatLink}/post:
+    post:
+      tags: [Comment]
+      summary: Post a comment
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentPostRequest'
+      responses:
+        '201':
+          description: Comment posted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /chat/{chatLink}/comment/edit:
+    post:
+      tags: [Comment]
+      summary: Edit a comment (own comments only)
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentEditRequest'
+      responses:
+        '200':
+          description: Comment updated successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Comment has been deleted
+
+  /chat/{chatLink}/del/{commentId}:
+    post:
+      tags: [Comment]
+      summary: Delete a comment
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+        - $ref: '#/components/parameters/CommentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                userToken:
+                  type: string
+              required: [token, userToken]
+      responses:
+        '200':
+          description: Comment deleted successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /chat/{chatLink}/comments:
+    get:
+      tags: [Comment]
+      summary: Get all comments in a chat
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  content:
+                    type: object
+                    properties:
+                      comments:
+                        type: object
+                        additionalProperties:
+                          $ref: '#/components/schemas/Comment'
+
+  # ==================== Reaction Endpoints ====================
+
+  /chat/reactions:
+    get:
+      tags: [Reaction]
+      summary: Get all available reactions
+      description: Returns permanent reactions and currently active seasonal reactions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  content:
+                    type: object
+                    properties:
+                      permanent:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        example:
+                          good: "👍"
+                          love: "❤️"
+                      seasonal:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            emoji:
+                              type: string
+                            period:
+                              type: string
+
+  /chat/{chatLink}/comment/reaction:
+    post:
+      tags: [Reaction]
+      summary: Add or update a reaction to a comment
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionAddRequest'
+      responses:
+        '200':
+          description: Reaction added successfully
+        '400':
+          description: Invalid reaction name or seasonal reaction not active
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /chat/{chatLink}/comment/{commentId}/reaction:
+    delete:
+      tags: [Reaction]
+      summary: Remove a reaction from a comment
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+        - $ref: '#/components/parameters/CommentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                userToken:
+                  type: string
+              required: [token, userToken]
+      responses:
+        '200':
+          description: Reaction removed successfully
+
+  # ==================== Report Endpoints ====================
+
+  /chat/{chatLink}/comment/{commentId}/report:
+    post:
+      tags: [Report]
+      summary: Report a comment
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+        - $ref: '#/components/parameters/CommentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                userToken:
+                  type: string
+                reason:
+                  type: string
+              required: [token, userToken, reason]
+      responses:
+        '201':
+          description: Report created successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /chat/{chatLink}/report:
+    post:
+      tags: [Report]
+      summary: Report a chat
+      parameters:
+        - $ref: '#/components/parameters/ChatLink'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                userToken:
+                  type: string
+                reason:
+                  type: string
+              required: [token, userToken, reason]
+      responses:
+        '201':
+          description: Report created successfully
+
+  # ==================== Admin Endpoints ====================
+
+  /admin/reports:
+    get:
+      tags: [Admin]
+      summary: List all reports (admin only)
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, pending, reviewing, resolved, rejected]
+            default: all
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, comment, chat]
+            default: all
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  content:
+                    type: object
+                    properties:
+                      reports:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Report'
+                      total:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/report/{reportId}/review:
+    post:
+      tags: [Admin]
+      summary: Review a report (admin only)
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [resolve, reject]
+                notes:
+                  type: string
+              required: [action]
+      responses:
+        '200':
+          description: Report reviewed successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==================== Service Endpoints ====================
+
+  /service/stats:
+    post:
+      tags: [Service]
+      summary: Get service statistics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceStatsResponse'
+
+  /service/detail:
+    post:
+      tags: [Service]
+      summary: Get service details and available endpoints
+      responses:
+        '200':
+          description: Successful response
+
+  /notification/bbauth:
+    post:
+      tags: [Service]
+      summary: Get notifications for authenticated account
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: SERVICE_TOKEN
+    AdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: ADMIN_TOKEN
+
+  parameters:
+    ChatLink:
+      name: chatLink
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique chat identifier
+
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Comment UUID
+
+  schemas:
+    # ==================== Request Schemas ====================
+
+    ChatCreateRequest:
+      type: object
+      required: [token, content]
+      properties:
+        token:
+          type: string
+          description: SERVICE_TOKEN
+        content:
+          type: object
+          required: [title, about, tag, link]
+          properties:
+            title:
+              type: string
+              maxLength: 100
+            about:
+              type: string
+              maxLength: 500
+            tag:
+              type: array
+              items:
+                type: string
+            link:
+              type: string
+              pattern: '^[a-zA-Z0-9_-]+$'
+              description: Unique chat identifier (alphanumeric, hyphens, underscores only)
+
+    ChatUpdateRequest:
+      type: object
+      required: [token, link, content]
+      properties:
+        token:
+          type: string
+        link:
+          type: string
+        content:
+          type: object
+          properties:
+            title:
+              type: string
+            about:
+              type: string
+            tag:
+              type: array
+              items:
+                type: string
+
+    CommentPostRequest:
+      type: object
+      required: [token, content]
+      properties:
+        token:
+          type: string
+        content:
+          type: object
+          required: [joinUserToken, comment]
+          properties:
+            joinUserToken:
+              type: string
+              description: USER_TOKEN
+            comment:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  maxLength: 2000
+
+    CommentEditRequest:
+      type: object
+      required: [token, content]
+      properties:
+        token:
+          type: string
+        content:
+          type: object
+          required: [sendUserToken, commentID, edited]
+          properties:
+            sendUserToken:
+              type: string
+            commentID:
+              type: string
+              format: uuid
+            edited:
+              type: string
+
+    ReactionAddRequest:
+      type: object
+      required: [token, content]
+      properties:
+        token:
+          type: string
+        content:
+          type: object
+          required: [userToken, commentID, reactionName]
+          properties:
+            userToken:
+              type: string
+            commentID:
+              type: string
+              format: uuid
+            reactionName:
+              type: string
+              enum: [good, love, laugh, wow, sad, angry, thanks, later, checked, typing, important, agree, ok, joke, hurry, awesome, king, dead-funny, vote, take-role, nostop, new-year, girls-day, spring, childrens-day, summer, fireworks, autumn, halloween, winter, christmas]
+
+    # ==================== Response Schemas ====================
+
+    ChatResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 201
+        content:
+          type: object
+          properties:
+            link:
+              type: string
+            title:
+              type: string
+            about:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
+            createdAt:
+              type: integer
+            updatedAt:
+              type: integer
+            participantCount:
+              type: integer
+            isAdmin:
+              type: boolean
+
+    ChatListResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        content:
+          type: object
+          properties:
+            chat:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  about:
+                    type: string
+                  tag:
+                    type: array
+                    items:
+                      type: string
+                  recent:
+                    type: string
+                    format: date-time
+                  authory:
+                    $ref: '#/components/schemas/ChatAuthority'
+
+    ChatGetResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        content:
+          type: object
+          properties:
+            chat:
+              type: object
+              properties:
+                comment:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/Comment'
+                information:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    about:
+                      type: string
+                    tag:
+                      type: array
+                      items:
+                        type: string
+                    recent:
+                      type: string
+                      format: date-time
+                    authory:
+                      $ref: '#/components/schemas/ChatAuthority'
+
+    Comment:
+      type: object
+      properties:
+        text:
+          type: string
+        commentedTime:
+          type: string
+          format: date-time
+        userName:
+          type: string
+        reaction:
+          type: object
+          additionalProperties:
+            type: string
+        editedTime:
+          type: string
+          format: date-time
+
+    CommentResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        content:
+          type: object
+          properties:
+            commentID:
+              type: string
+              format: uuid
+            text:
+              type: string
+            commentedTime:
+              type: string
+              format: date-time
+            userName:
+              type: string
+
+    ChatAuthority:
+      type: object
+      properties:
+        blocked:
+          type: array
+          items:
+            type: string
+        notParticipating:
+          type: array
+          items:
+            type: string
+        audience:
+          type: array
+          items:
+            type: string
+        entrant:
+          type: array
+          items:
+            type: string
+        manager:
+          type: array
+          items:
+            type: string
+        owner:
+          type: array
+          items:
+            type: string
+
+    Report:
+      type: object
+      properties:
+        reportID:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [comment, chat]
+        targetID:
+          type: string
+        reporterName:
+          type: string
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, reviewing, resolved, rejected]
+        reviewedBy:
+          type: string
+        reviewedAt:
+          type: string
+          format: date-time
+
+    ServiceStatsResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        content:
+          type: object
+          properties:
+            totalChats:
+              type: integer
+            totalComments:
+              type: integer
+            totalUsers:
+              type: integer
+            activeChatsLast24h:
+              type: integer
+            activeUsersLast24h:
+              type: integer
+            averageTrustScore:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+
+    NotificationResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        content:
+          type: object
+          properties:
+            notifications:
+              type: array
+              items:
+                type: object
+                properties:
+                  notificationID:
+                    type: string
+                    format: uuid
+                  title:
+                    type: string
+                  message:
+                    type: string
+                  chatLink:
+                    type: string
+                  commentID:
+                    type: string
+                    format: uuid
+                    nullable: true
+                  createdTime:
+                    type: string
+                    format: date-time
+                  read:
+                    type: boolean
+            total:
+              type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        error:
+          type: string
+        content:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 400
+            error: "Bad Request"
+            content: "Missing required fields"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 401
+            error: "Unauthorized"
+            content: "Invalid or missing token"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 403
+            error: "Forbidden"
+            content: "Insufficient permissions"
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 404
+            error: "Not Found"
+            content: "Resource not found"
+
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 429
+            error: "Too Many Requests"
+            content: "Rate limit exceeded. Try again in 30 seconds."
