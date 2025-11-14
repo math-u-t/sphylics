@@ -4,14 +4,18 @@ compatibility_date = "2024-01-01"
 
 # Worker configuration
 workers_dev = true
-account_id = ""
-route = ""
+# account_id = ""  # REQUIRED: Get from Cloudflare dashboard
+# route = ""  # OPTIONAL: Custom route for production
 
 # KV Namespace bindings
 # Run: wrangler kv:namespace create "KV" to get the ID
 # Run: wrangler kv:namespace create "KV" --preview to get the preview_id
 kv_namespaces = [
-  { binding = "KV", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID" }
+  # REQUIRED: Create KV namespace with:
+  #   wrangler kv:namespace create "KV"
+  #   wrangler kv:namespace create "KV" --preview
+  # Then replace the IDs below
+  # { binding = "KV", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID" }
 ]
 
 # Limits
@@ -33,24 +37,27 @@ cpu_ms = 50
 
 # Environment variables (non-secret)
 [vars]
-ISSUER_URL = "https://bbauth.example.com"
+# REQUIRED: Update with your actual domain
+ISSUER_URL = "https://your-domain.com"
+# REQUIRED: Deploy Apps Script first, then update with the Web App URL
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
-ALLOWED_ORIGINS = "https://example.com,https://app.example.com"
+# REQUIRED: Update with your frontend domain(s)
+ALLOWED_ORIGINS = "http://localhost:5173,https://your-domain.com"
 
 # Production environment
 [env.production]
 vars = {
-  ISSUER_URL = "https://bbauth.example.com",
+  ISSUER_URL = "https://your-domain.com",
   APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_PRODUCTION_SCRIPT_ID/exec",
-  ALLOWED_ORIGINS = "https://example.com"
+  ALLOWED_ORIGINS = "https://your-domain.com"
 }
 
 # Development environment
 [env.dev]
 vars = {
-  ISSUER_URL = "https://bbauth-dev.example.workers.dev",
+  ISSUER_URL = "http://localhost:8787",
   APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEV_SCRIPT_ID/exec",
-  ALLOWED_ORIGINS = "http://localhost:3000,https://localhost:3000"
+  ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:3000"
 }
 
 # Secrets (set with wrangler secret put)

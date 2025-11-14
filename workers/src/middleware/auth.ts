@@ -60,7 +60,7 @@ export async function requireAdminToken(
   request: Request,
   env: Env,
   requiredRole?: AdminRole
-): Promise<{ userName: string; authory: AdminRole } | Response> {
+): Promise<{ userName: string; authority: AdminRole } | Response> {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.replace('Bearer ', '') || '';
 
@@ -94,7 +94,7 @@ export async function requireAdminToken(
   }
 
   // 特定のロールが必要な場合
-  if (requiredRole && payload.authory !== requiredRole) {
+  if (requiredRole && payload.authority !== requiredRole) {
     return new Response(
       JSON.stringify({
         statusCode: 403,
@@ -108,7 +108,7 @@ export async function requireAdminToken(
     );
   }
 
-  return { userName: payload.userName, authory: payload.authory };
+  return { userName: payload.userName, authority: payload.authority };
 }
 
 /**
@@ -117,7 +117,7 @@ export async function requireAdminToken(
 export async function requireUserToken(
   token: string,
   env: Env
-): Promise<{ userName: string; link: string; authory: ChatRole } | null> {
+): Promise<{ userName: string; link: string; authority: ChatRole } | null> {
   const payload = await verifyUserToken(token, env);
   if (!payload) {
     return null;
@@ -126,7 +126,7 @@ export async function requireUserToken(
   return {
     userName: payload.userName,
     link: payload.link,
-    authory: payload.authory,
+    authority: payload.authority,
   };
 }
 
@@ -150,7 +150,7 @@ export async function checkChatPermission(
   }
 
   const chatData = JSON.parse(chatDataStr);
-  const authory = chatData.authory;
+  const authority = chatData.authority;
 
   // ロールの優先順位
   const roleHierarchy: ChatRole[] = ['owner', 'manager', 'entrant', 'audience', 'notParticipating', 'blocked'];
@@ -158,7 +158,7 @@ export async function checkChatPermission(
   // ユーザーの現在のロールを取得
   let userRole: ChatRole | null = null;
   for (const role of roleHierarchy) {
-    if (authory[role]?.includes(userName)) {
+    if (authority[role]?.includes(userName)) {
       userRole = role;
       break;
     }
@@ -189,12 +189,12 @@ export async function getUserRole(
   }
 
   const chatData = JSON.parse(chatDataStr);
-  const authory = chatData.authory;
+  const authority = chatData.authority;
 
   const roles: ChatRole[] = ['owner', 'manager', 'entrant', 'audience', 'notParticipating', 'blocked'];
 
   for (const role of roles) {
-    if (authory[role]?.includes(userName)) {
+    if (authority[role]?.includes(userName)) {
       return role;
     }
   }

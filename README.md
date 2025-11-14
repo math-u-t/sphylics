@@ -1,136 +1,187 @@
-# flexio - 匿名チャットアプリ
-# sphylics
+# Flexio - 匿名チャットプラットフォーム
 
-完全匿名のチャットプラットフォームと、RFC 6749準拠のOAuth 2.0プロバイダー「bbauth」を提供します。
+完全匿名のチャットプラットフォームと、RFC 6749準拠のOAuth 2.0認証システムを提供します。
+
+> **注**: このプロジェクトは以前 "sphylics" および "bbauth" と呼ばれていました。現在は **Flexio** に統一されています。
 
 ## プロジェクト構成
 
 ```
-sphylics/
-├── frontend/        # 匿名チャットフロントエンド (Vue.js 3)
-├── workers/         # bbauth - Cloudflare Workers実装
-├── appsscript/      # bbauth - Google Apps Script実装
-└── docs/            # APIドキュメント
+flexio/
+├── frontend/        # Vue.js 3 フロントエンド
+├── workers/         # Cloudflare Workers API (バックエンド)
+├── appsscript/      # Google Apps Script 認証レイヤー
+├── docs/            # API ドキュメント
+└── SETUP.md         # セットアップガイド
 ```
 
-## 🗨️ 匿名チャットアプリ
+## ✨ 主な機能
 
-完全匿名のチャットプラットフォーム。安全でプライベートなコミュニケーションを提供します。
+### チャット機能
+- 🔒 **完全匿名** - 個人情報不要でチャット参加
+- 📝 **マークダウン対応** - リッチなテキスト表現
+- 👍 **リアクションシステム** - 30種類以上の常設リアクション + 季節限定リアクション
+- 🏷️ **ロールベース権限** - Owner, Manager, Entrant, Audience など
+- 📊 **信頼スコア** - チャットの信頼性を可視化
+- 🔍 **検索・タグ機能** - チャットを簡単に発見
 
-### 特徴
-
-- 🔒 完全匿名 - 個人情報不要
-- 🔐 エンドツーエンド暗号化
-- 📝 マークダウン対応
-- 🌓 ダークモード/ライトモード
-- 📱 完全レスポンシブ対応
+### セキュリティ
+- 🔐 **RFC 6749準拠 OAuth 2.0**
+- ✅ **PKCE必須** (RFC 7636)
+- 🔑 **ES256 JWT署名**
+- 🛡️ **レート制限** (60 req/min)
+- 📋 **レポート・モデレーション機能**
 
 ### 技術スタック
 
-- Vue.js 3
+**フロントエンド:**
+- Vue.js 3 (Composition API)
 - Vue Router 4
-- Vite
+- Vite 7
 - Tailwind CSS 3
 - Markdown-it
 - Material Design Icons
 
-## 🔐 bbauth - OAuth 2.0 Provider
+**バックエンド:**
+- Cloudflare Workers (TypeScript)
+- Cloudflare KV (データストレージ)
+- Google Apps Script (OAuth認証)
+- OpenAPI 3.0仕様
 
-RFC 6749準拠のOAuth 2.0プロバイダー。Cloudflare WorkersとGoogle Apps Scriptを組み合わせた、セキュアで高速な認証基盤です。
-
-### 特徴
-
-- ✅ RFC 6749準拠のOAuth 2.0実装
-- ✅ OpenID Connect Discovery対応
-- ✅ PKCE必須 (RFC 7636)
-- ✅ ES256 JWT署名
-- ✅ Google Apps Script統合
-- ✅ グローバル分散 (Cloudflare Edge)
-- ✅ 月間100万認証で$5.50のコスト効率
-
-### アーキテクチャ
+## 🏗️ アーキテクチャ
 
 ```mermaid
-flowchart LR
-    A[Client Application]
-        --> B[Cloudflare Workers<br/>(OAuth Logic)]
-    B --> C[Google Apps Script<br/>(Identity Verification)]
-    C --> D[Cloudflare Workers<br/>(Token Issue)]
-    D --> A
+flowchart TB
+    subgraph Frontend["フロントエンド (Vue.js)"]
+        UI[ユーザーインターフェース]
+        API_Client[API クライアント]
+    end
+
+    subgraph Backend["バックエンド (Cloudflare Workers)"]
+        Router[ルーター]
+        Auth[認証ミドルウェア]
+        Handlers[API ハンドラー]
+        KV[(Cloudflare KV)]
+    end
+
+    subgraph OAuth["OAuth認証"]
+        GAS[Google Apps Script]
+    end
+
+    UI --> API_Client
+    API_Client --> Router
+    Router --> Auth
+    Auth --> Handlers
+    Handlers --> KV
+    Auth --> GAS
 ```
 
-### クイックスタート
+## 🚀 クイックスタート
 
-詳細は [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) を参照してください。
+詳細なセットアップ手順は [SETUP.md](SETUP.md) を参照してください。
 
-```bash
-# 1. Workers環境準備
-cd workers
-npm install
-wrangler kv:namespace create "KV"
-
-# 2. Apps Scriptデプロイ
-cd ../appsscript
-clasp login
-clasp create --type webapp
-clasp push
-
-# 3. JWT鍵ペア生成
-wrangler secret put ADMIN_TOKEN
-curl -X POST https://your-worker.workers.dev/setup/init
-
-# 4. デプロイ
-wrangler deploy
-```
-
-### ドキュメント
-
-- [API Reference](docs/API_REFERENCE.md) - OAuth 2.0エンドポイント仕様
-- [Architecture](docs/ARCHITECTURE.md) - システムアーキテクチャ
-- [Security](docs/SECURITY.md) - セキュリティ設計
-- [Setup Guide](docs/SETUP_GUIDE.md) - セットアップ手順
-
-## セットアップ
+### 1. フロントエンドの起動
 
 ```bash
 cd frontend
 npm install
-```
-
-## 開発サーバー起動
-
-```bash
 npm run dev
 ```
 
-## ビルド
+フロントエンドは `http://localhost:5173` で起動します。
+
+### 2. バックエンド（Workers）の起動
 
 ```bash
-npm run build
+cd workers
+npm install
+npm run dev
 ```
 
-## ページ一覧
+Workers APIは `http://localhost:8787` で起動します。
 
+### 3. Google Apps Script の設定（オプション）
+
+OAuth認証を使用する場合は、Google Apps Scriptのデプロイが必要です。
+詳細は [SETUP.md](SETUP.md) を参照してください。
+
+## 📚 ドキュメント
+
+- **[SETUP.md](SETUP.md)** - セットアップガイド（詳細）
+- **[docs/API_REFERENCE.md](docs/API_REFERENCE.md)** - API仕様
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - システムアーキテクチャ
+- **[docs/SECURITY.md](docs/SECURITY.md)** - セキュリティ設計
+- **[docs/CHAT_API.md](docs/CHAT_API.md)** - チャットAPI仕様
+- **[workers/openapi.yaml](workers/openapi.yaml)** - OpenAPI 3.0仕様
+
+## 📄 ページ一覧
+
+### メイン機能
 - `/` - トップページ
-- `/about` - About
-- `/policy` - プライバシーポリシー
-- `/faq` - FAQ
-- `/inquiry` - お問い合わせ
 - `/chat/:chatId` - チャットルーム
 - `/dashboard` - ダッシュボード
-- `/error` - エラーページ
 - `/newchat` - 新規チャット作成
-- `/newaccount` - アカウント作成
 - `/joinchat` - チャット参加
-- `/jobs` - 採用情報
-- `/terms` - 利用規約
+- `/search` - チャット検索
+
+### 情報ページ
+- `/about` - Flexioについて
+- `/faq` - よくある質問
+- `/devs` - 開発者向けAPI ドキュメント
 - `/stats` - 統計情報
-- `/devs` - API Docs
-- `/admin` - 管理者ページ
 - `/information` - お知らせ
 - `/newfunctionlab` - 新機能ラボ
-- `/search` - 検索
 
-## ライセンス
+### アカウント・管理
+- `/newaccount` - アカウント作成
+- `/admin` - 管理者ページ
 
-MIT
+### その他
+- `/policy` - プライバシーポリシー
+- `/terms` - 利用規約
+- `/inquiry` - お問い合わせ
+- `/jobs` - 採用情報
+- `/error` - エラーページ
+
+## 🚧 実装状況
+
+### ✅ 実装済み
+- [x] Workers API（完全実装）
+  - [x] OAuth 2.0エンドポイント
+  - [x] チャット管理API
+  - [x] コメント管理API
+  - [x] リアクションAPI
+  - [x] レポート・モデレーションAPI
+  - [x] 管理者API
+- [x] フロントエンドUI（完全実装）
+  - [x] 20ページのUI
+  - [x] ダークモード対応
+  - [x] マークダウンレンダリング
+- [x] 型定義（TypeScript）
+- [x] OpenAPI 3.0仕様書
+- [x] ドキュメント
+
+### 🚧 進行中
+- [ ] フロントエンド ↔ Workers API統合
+  - [x] API クライアント作成
+  - [ ] 各ページのAPI統合
+- [ ] OAuth 2.0フロー（現在はlocalStorageのみ）
+
+### 📋 今後の予定
+- [ ] リアルタイム通信（WebSocket）
+- [ ] オフライン対応
+- [ ] テストスイート
+- [ ] CI/CD パイプライン
+
+## 🤝 コントリビューション
+
+プルリクエストを歓迎します！大きな変更の場合は、まずissueを開いて変更内容を議論してください。
+
+## 📝 ライセンス
+
+MIT License - 詳細は [LICENSE](LICENSE) を参照してください。
+
+## 📧 お問い合わせ
+
+- GitHub Issues: [https://github.com/your-username/flexio/issues](https://github.com/your-username/flexio/issues)
+- Email: contact@example.com

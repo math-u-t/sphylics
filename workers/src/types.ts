@@ -162,7 +162,7 @@ export interface UserTokenPayload {
   userName: string;
   link: string;  // チャットUUID
   savedTime: string;  // ISO 8601形式
-  authory: ChatRole;
+  authority: ChatRole;
 }
 
 // 2. COMMENT_TOKEN - コメント識別トークン
@@ -179,7 +179,7 @@ export interface InsideAccountTokenPayload {
   bbauthAccountID: string;
   belonging: {
     [chatLink: string]: {
-      authory: ChatRole;
+      authority: ChatRole;
     };
   };
   serviceJoined: string;  // ISO 8601形式
@@ -198,7 +198,7 @@ export interface ServiceTokenPayload {
 export interface AdminTokenPayload {
   userName: string;
   passwordHash: string;  // ハッシュ化済み
-  authory: AdminRole;
+  authority: AdminRole;
   period: string;  // 有効期限 ISO 8601形式
 }
 
@@ -266,7 +266,7 @@ export interface AccountData {
   bbauthAccountID: string;
   belonging: {
     [chatLink: string]: {
-      authory: ChatRole;
+      authority: ChatRole;
       userName: string;
       joinedAt: string;  // ISO 8601
     };
@@ -281,7 +281,7 @@ export interface AccountData {
 export interface UserData {
   userName: string;
   link: string;
-  authory: ChatRole;
+  authority: ChatRole;
   accountID?: string;  // 紐付けられたアカウント（オプション）
   joinedAt: string;  // ISO 8601
 }
@@ -293,7 +293,7 @@ export interface ChatData {
   about: string;
   tags: string[];
   recent: string;  // ISO 8601 - 最終活動時刻
-  authory: {
+  authority: {
     blocked: string[];  // userNames
     notParticipating: string[];
     audience: string[];
@@ -399,7 +399,7 @@ export interface ChatListResponse {
       about: string;
       tag: string[];
       recent: string;  // ISO 8601
-      authory: {
+      authority: {
         blocked: string[];
         audience: string[];
         entrant: string[];
@@ -449,7 +449,7 @@ export interface ChatGetResponse {
       about: string;
       tag: string[];
       recent: string;
-      authory: {
+      authority: {
         blocked: string[];
         audience: string[];
         entrant: string[];

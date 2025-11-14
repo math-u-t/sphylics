@@ -30,7 +30,7 @@ All keys follow a prefix-based naming scheme for efficient querying and organiza
   about: string;             // Description (max 500 chars)
   tags: string[];            // Tag array
   recent: string;            // ISO 8601 - last activity
-  authory: {
+  authority: {
     blocked: string[];       // Blocked user names
     notParticipating: string[];
     audience: string[];      // View-only users
@@ -61,7 +61,7 @@ All keys follow a prefix-based naming scheme for efficient querying and organiza
   "about": "A place for general conversation",
   "tags": ["public", "general"],
   "recent": "2025-11-14T12:34:56Z",
-  "authory": {
+  "authority": {
     "blocked": [],
     "notParticipating": [],
     "audience": ["user1"],
@@ -134,7 +134,7 @@ All keys follow a prefix-based naming scheme for efficient querying and organiza
   bbauthAccountID: string;   // bbauth integration
   belonging: {
     [chatLink: string]: {
-      authory: ChatRole;     // Role in this chat
+      authority: ChatRole;     // Role in this chat
       userName: string;      // Identity in this chat
       joinedAt: string;      // ISO 8601
     };
@@ -154,12 +154,12 @@ All keys follow a prefix-based naming scheme for efficient querying and organiza
   "bbauthAccountID": "bbauth-12345",
   "belonging": {
     "general-discussion": {
-      "authory": "entrant",
+      "authority": "entrant",
       "userName": "user2",
       "joinedAt": "2025-11-14T10:00:00Z"
     },
     "tech-chat": {
-      "authory": "owner",
+      "authority": "owner",
       "userName": "admin",
       "joinedAt": "2025-11-01T08:00:00Z"
     }

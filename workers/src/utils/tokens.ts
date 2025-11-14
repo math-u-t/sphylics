@@ -149,7 +149,7 @@ export async function verifyUserToken(
     userName: payload.userName,
     link: payload.link,
     savedTime: payload.savedTime,
-    authory: payload.authory,
+    authority: payload.authority,
   };
 }
 
@@ -241,7 +241,7 @@ export async function verifyAdminToken(
   return {
     userName: payload.userName,
     passwordHash: payload.passwordHash,
-    authory: payload.authory,
+    authority: payload.authority,
     period: payload.period,
   };
 }

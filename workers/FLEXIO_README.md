@@ -68,7 +68,7 @@ Identifies a user within a specific chat.
   userName: string;
   link: string;        // Chat UUID
   savedTime: string;   // ISO 8601
-  authory: ChatRole;   // user's role in this chat
+  authority: ChatRole;   // user's role in this chat
 }
 ```
 
@@ -101,7 +101,7 @@ Identifies a specific comment.
   bbauthAccountID: string;
   belonging: {
     [chatLink: string]: {
-      authory: ChatRole;
+      authority: ChatRole;
     };
   };
   serviceJoined: string; // ISO 8601
@@ -136,7 +136,7 @@ Admin authentication token.
 {
   userName: string;
   passwordHash: string;  // SHA-256 hashed
-  authory: 'audit' | 'dev' | 'council';
+  authority: 'audit' | 'dev' | 'council';
   period: string;        // ISO 8601 expiry
 }
 ```
@@ -280,7 +280,7 @@ List all chats (with filters).
         "about": "Description",
         "tag": ["tag1", "tag2"],
         "recent": "2025-11-14T12:00:00Z",
-        "authory": {
+        "authority": {
           "blocked": [],
           "audience": ["user1"],
           "entrant": ["user2"],
@@ -336,7 +336,7 @@ Get chat details and comments.
         "about": "Description",
         "tag": ["tag1"],
         "recent": "2025-11-14T12:00:00Z",
-        "authory": { ... }
+        "authority": { ... }
       }
     }
   }

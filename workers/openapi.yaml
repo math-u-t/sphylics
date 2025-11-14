@@ -755,7 +755,7 @@ components:
                   recent:
                     type: string
                     format: date-time
-                  authory:
+                  authority:
                     $ref: '#/components/schemas/ChatAuthority'
 
     ChatGetResponse:
@@ -787,7 +787,7 @@ components:
                     recent:
                       type: string
                       format: date-time
-                    authory:
+                    authority:
                       $ref: '#/components/schemas/ChatAuthority'
 
     Comment:

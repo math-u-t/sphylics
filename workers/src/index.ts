@@ -223,7 +223,7 @@ export default {
                 edit: 'POST /chat/:chatLink/edit',
                 delete: 'POST /chat/:chatLink/del',
                 report: 'POST /chat/:chatLink/report',
-                authory: 'GET /chat/:chatLink/authory',
+                authority: 'GET /chat/:chatLink/authority',
                 comments: 'GET /chat/:chatLink/comments',
               },
               comment: {
