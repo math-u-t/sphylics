@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isAuthenticated } from '../utils/tokenManager'
 
 const routes = [
   {
@@ -6,6 +7,24 @@ const routes = [
     name: 'Top',
     component: () => import('../views/TopPage.vue'),
     meta: { title: 'flexio - 匿名チャット' }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/LoginPage.vue'),
+    meta: { title: 'Login - flexio' }
+  },
+  {
+    path: '/oauth/callback',
+    name: 'OAuthCallback',
+    component: () => import('../views/OAuthCallbackPage.vue'),
+    meta: { title: 'Completing Sign In - flexio' }
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('../views/SettingsPage.vue'),
+    meta: { title: 'Settings - flexio', requiresAuth: true }
   },
   {
     path: '/about',
@@ -133,23 +152,40 @@ const router = createRouter({
   }
 })
 
-// Navigation guard for auth
+// Navigation guard for OAuth authentication
 router.beforeEach((to, from, next) => {
   // Update document title
   document.title = to.meta.title || 'flexio'
 
+  // Skip auth check for public routes and OAuth callback
+  const publicRoutes = ['/', '/login', '/oauth/callback', '/about', '/policy', '/terms', '/faq', '/inquiry', '/error']
+  if (publicRoutes.includes(to.path)) {
+    next()
+    return
+  }
+
   // Check if route requires authentication
   if (to.meta.requiresAuth) {
-    const isAuthenticated = localStorage.getItem('flexio_user_id')
-    if (!isAuthenticated) {
-      next('/newaccount')
-      return
+    // Use OAuth token-based authentication
+    if (!isAuthenticated()) {
+      // Check for legacy localStorage auth (backward compatibility)
+      const legacyAuth = localStorage.getItem('flexio_user_id')
+      if (!legacyAuth) {
+        // Redirect to login page
+        next('/login')
+        return
+      }
     }
   }
 
-  // Check if route requires admin
+  // Check if route requires admin (legacy check + future OAuth scope check)
   if (to.meta.requiresAdmin) {
+    // Legacy admin check
     const isAdmin = localStorage.getItem('flexio_is_admin') === 'true'
+
+    // TODO: In future, check OAuth scope for 'admin' permission
+    // const hasAdminScope = hasScope('admin')
+
     if (!isAdmin) {
       next('/error')
       return
